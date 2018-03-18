@@ -33,14 +33,14 @@ void setup() {
 void loop() {
   if (button1_interess){ //interessado no botao 1
     button1_read = digitalRead(KEY1); //le o botao 1
-    if (button1_read != button1_active) { //vai ativar quando for precionado ou levantado
+    if (button1_read != button1_active) { //vai ativar quando for pressionado ou levantado
       button_changed(KEY1, button1_read);
       button1_active = button1_read;
     }
   }
   if (button2_interess){ //interessado no botao 2
     button2_read = digitalRead(KEY2); //le o botao 2
-    if (button2_read != button2_active) { //vai ativar quando for precionado ou levantado
+    if (button2_read != button2_active) { //vai ativar quando for pressionado ou levantado
       button_changed(KEY2, button2_read);
       button2_active = button2_read;
     }
