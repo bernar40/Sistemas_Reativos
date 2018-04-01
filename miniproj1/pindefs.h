@@ -7,3 +7,7 @@
 #define KEY2       A2
 #define KEY3       A3
 #define POT        A0
+/* Define shift register pins used for seven segment display */
+#define LATCH_DIO   4
+#define CLK_DIO     7
+#define DATA_DIO    8
