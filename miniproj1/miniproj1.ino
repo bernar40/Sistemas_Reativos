@@ -1,3 +1,10 @@
+/*
+ * Dupla:
+ * Alexandre Wanick - 1512647
+ * Bernardo Ruga - 1511651
+ */
+
+
 #include "pindefs.h"
 
 #define MINUTE 60000
