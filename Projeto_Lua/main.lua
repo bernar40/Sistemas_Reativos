@@ -1,43 +1,10 @@
+missil_state = 0
 
-function wait (sec, inimigo)
-  inimigo.state = 0
-  inimigo.wait_until = current_time+sec
+function wait (sec, objeto)
+  objeto.state = 0
+  objeto.wait_until = current_time+sec
   coroutine.yield()
 end
-
-function retangulo (x,y,w,h)
-  local originalx, originaly, rx, ry, rw, rh = x, y, x, y, w, h
-  local missil_existe = 0
-  return {
-    draw =
-      function ()
-        love.graphics.setColor (0,0,255)
-        love.graphics.rectangle("fill", rx, ry, rw, rh)
-        if missil_existe then
-          missil.draw(rx, ry)
-        end
-      end,
-    update =
-      function (dt)
-        local mx, my = love.mouse.getPosition()
-        if love.keyboard.isDown("right") then
-          rx = rx + 100*dt
-        elseif love.keyboard.isDown("left") then
-          rx = rx - 100*dt
-        end
-      end,
-    keypressed = 
-      function(key)
-        if key == ' ' then
-          missil_existe = 1
-          missil = missil (rx, ry, 5, 10)
-        end
-      end
-  }
-end
-
-
-
 
 
 
@@ -68,44 +35,79 @@ function inimigo (x1,y1,x2,y2,x3,y3, vel)
 end
 function missil (x, y, r, vel)
   local rx, ry, rr = x, y, r
+  local width, height = love.graphics.getDimensions()
   return {
     draw =
       function (retx, rety)
         love.graphics.setColor (255,255,0)
-        love.graphics.circle("fill", retx, rety, rr)
+        love.graphics.circle("fill", rx, ry, rr)
+      end,
+    update = 
+      function(dt)
+        while ry > 0 do
+          ry = ry - vel
+        end
+      end
+  }
+end
+
+function player (x,y,w,h)
+  local originalx, originaly, rx, ry, rw, rh = x, y, x, y, w, h
+  missil = missil(rx, ry+10, 5, 10)
+  return {
+    draw =
+      function ()
+        love.graphics.setColor (0,0,255)
+        love.graphics.rectangle("fill", rx, ry, rw, rh)
+      end,
+    update =
+      function (dt)
+        local mx, my = love.mouse.getPosition()
+        if love.keyboard.isDown("right") then
+          rx = rx + 100*dt
+          playerx = rx
+        elseif love.keyboard.isDown("left") then
+          rx = rx - 100*dt
+        end
       end,
     keypressed = 
       function(key)
-        if key == ' ' then 
-          ry = ry + vel
+        if key == "up" then
+          missil_state = 1
         end
       end
   }
 end
 
 
-
-
 function love.load()
-  ret1 = retangulo(375, 525, 25, 25)
-  inimigo1 = inimigo(100, 100, 125, 100, 112.5, 125, 5)
+  player = player(375, 525, 25, 25)
+  inimigo= inimigo(100, 100, 125, 100, 112.5, 125, 5)
 end
 
-function love.keypressed(key)
-  ret1.keypressed(key)
-end
     
+function love.keypressed(key)
+  player.keypressed(key)
+end
+
 function love.update(dt)
   current_time = love.timer.getTime()
-  ret1.update(dt)
-  inimigo1.update(inimigo1)
+  player.update(dt)
+  inimigo.update(inimigo)
+  if missil_state then
+    io.write(missil_state)
+    missil.update(dt)
+  end
 end
 
 function love.draw()
   love.graphics.setColor (0,255,0)
   love.graphics.rectangle("fill", 0, 575, 800, 25)
-  ret1.draw()
-  inimigo1.draw()
+  player.draw()
+  inimigo.draw()
+  if missil_state then
+    missil.draw()
+  end
 
 
 end
