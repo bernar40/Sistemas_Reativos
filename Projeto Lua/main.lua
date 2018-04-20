@@ -1,11 +1,11 @@
-function wait (sec, objeto)
-  objeto.state = 0
+function wait (sec, objeto, n)
+--  objeto.state = 0
   objeto.wait_until = current_time+sec
-  coroutine.yield()
+  coroutine.yield(n)
 end
 
-function inimigo (x1,y1,x2,y2,x3,y3, vel, vetor)
-  table.insert(vetor, {
+function inimigo (x1,y1,x2,y2,x3,y3, vel, enemies)
+  table.insert(enemies, {
       px1 = x1,
       py1 = y1,
       px2 = x2,
@@ -15,28 +15,34 @@ function inimigo (x1,y1,x2,y2,x3,y3, vel, vetor)
       hitbox_px = x1 - (x2-x1)/2,
       hitbox_py = y1 - (y3-y1)/2,
       width = (x2-x1)*2,
-      height = (y3-y1)
+      height = (y3-y1),
+      is_hit = 0
     })
   return {
-    update = coroutine.wrap (function (self)
+    update = coroutine.wrap (function (self, dt, enemy)
+      local width, height = love.graphics.getDimensions()
       while true do
-        local width, height = love.graphics.getDimensions()
-        enemies[1].px1 = enemies[1].px1 + vel
-        enemies[1].px2 = enemies[1].px2 + vel
-        enemies[1].px3 = enemies[1].px3 + vel
-        if enemies[1].px1 > width then 
-          enemies[1].px1 = x1
-          enemies[1].px2 = x2
-          enemies[1].px3 = x3
-        end
-        wait(vel/100, self)
+ --       for n,enemy in ipairs(enemies) do
+          enemy.px1 = enemy.px1 + vel*dt
+          enemy.px2 = enemy.px2 + vel*dt
+          enemy.px3 = enemy.px3 + vel*dt
+          if enemy.px1 > width then 
+            enemy.px1 = x1
+            enemy.px2 = x2
+            enemy.px3 = x3
+          end
+        enemy.hitbox_px = (enemy.px1- (enemy.px2-enemy.px1)/2) + vel*dt
+        wait(vel/1000, self, )
+ --       end
       end
     end),
     draw =
       function ()
         for i, enemy in ipairs(enemies) do
-          love.graphics.setColor (255,0,0)
-          love.graphics.polygon("fill", enemy.px1, enemy.py1, enemy.px2, enemy.py2, enemy.px3, enemy.py3)
+          if enemy.is_hit == 0 then
+            love.graphics.setColor (255,0,0)
+            love.graphics.polygon("fill", enemy.px1, enemy.py1, enemy.px2, enemy.py2, enemy.px3, enemy.py3)
+          end
         end
       end
   }
@@ -70,10 +76,10 @@ function player (x,y,w,h)
   }
 end
 
-function missil_spawn(vetor)
+function missil_spawn(misseis)
   x = player_x + (25)/2
   y = player_y + (25)/2
-  table.insert(vetor, {
+  table.insert(misseis, {
       px = x,
       py = y,
       hitbox_px = x - 5/2,
@@ -82,6 +88,7 @@ function missil_spawn(vetor)
       height = 10
     })
 end
+
 function missil_move(dt, tab)
   tab.py = tab.py - 300 * dt
   tab.hitbox_py = tab.py
@@ -96,10 +103,14 @@ function love.load()
   player_y = 525
   misseis = {}
   enemies = {}
+  inimigos = {}
+  is_hit = {}
   player = player(player_x, player_y, 25, 25)
-  inimigo= inimigo(100, 100, 125, 100, 112.5, 125, 0, enemies)
+  for i=1, 5 do
+    inimigos[i] = inimigo(100+(i*100), 100, 125+(i*100), 100, 112.5+(i*100), 125, 500, enemies)
+    is_hit[i] = 0
+  end
 end
-
     
 function love.keypressed(key)
   player.keypressed(key)
@@ -108,7 +119,11 @@ end
 function love.update(dt)
   current_time = love.timer.getTime()
   player.update(dt)
-  inimigo.update(inimigo)
+  for n, enemy in ipairs(enemies) do
+    if enemy.is_hit == 0 then
+      inimigos[n].update(inimigos[n], dt, enemy)
+    end
+  end
   for i, missil in ipairs(misseis) do
     missil_move(dt, missil)
   end
@@ -118,6 +133,9 @@ function love.update(dt)
     else
       for n, enemy in ipairs(enemies) do
         if checar_colisao(missil.hitbox_px, missil.hitbox_py, missil.width, missil.height, enemy.hitbox_px, enemy.hitbox_py, enemy.width, enemy.height) then
+--          table.remove(inimigos, n)
+--          is_hit[n] = 1
+          enemy.is_hit = 1
           table.remove(enemies, n)
           table.remove(misseis, i)
           break
@@ -131,7 +149,11 @@ function love.draw()
   love.graphics.setColor (0,255,0)
   love.graphics.rectangle("fill", 0, 575, 800, 25)
   player.draw()
-  inimigo.draw()
+  for n, enemy in ipairs(enemies) do
+    if enemy.is_hit == 0 then
+      inimigos[n].draw()
+    end
+  end
   for i, missil in ipairs(misseis) do
     love.graphics.setColor (255,255,0)
     love.graphics.circle("fill", missil.px, missil.py, 5)
