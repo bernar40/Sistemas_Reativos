@@ -1,7 +1,7 @@
-function wait (sec, objeto, n)
+function wait (sec, objeto)
 --  objeto.state = 0
   objeto.wait_until = current_time+sec
-  coroutine.yield(n)
+  coroutine.yield()
 end
 
 function inimigo (x1,y1,x2,y2,x3,y3, vel, enemies)
@@ -32,7 +32,7 @@ function inimigo (x1,y1,x2,y2,x3,y3, vel, enemies)
             enemy.px3 = x3
           end
         enemy.hitbox_px = (enemy.px1- (enemy.px2-enemy.px1)/2) + vel*dt
-        wait(vel/1000, self, )
+        wait(vel/1000, self)
  --       end
       end
     end),
