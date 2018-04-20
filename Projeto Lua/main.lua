@@ -14,7 +14,7 @@ function inimigo (x1,y1,x2,y2,x3,y3, vel, enemies)
       py3 = y3,
       hitbox_px = x1 - (x2-x1)/2,
       hitbox_py = y1 - (y3-y1)/2,
-      width = (x2-x1)*2,
+      width = (x2-x1),
       height = (y3-y1),
       is_hit = 0
     })
