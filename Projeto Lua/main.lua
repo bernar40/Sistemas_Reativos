@@ -152,6 +152,8 @@ function love.load()
   player = player(player_x, player_y, 25, 25)
   k = 1
   j = 1
+  base_hits_x = {}
+  life_bar_width = 100
   for i=1, 15 do
     if i<6 then
       k = 1
@@ -192,8 +194,10 @@ function love.update(dt)
   end
   for i, missil in ipairs(misseis_inimigos) do
     missil_inimigo_move(dt, missil)
-    if missil.py > 600 then    
+    if missil.py > 575 then  --
       table.remove(misseis_inimigos, i)
+      table.insert(base_hits_x, missil.px)
+      life_bar_width = life_bar_width - 10
     end
   end
   for i, missil_ini in ipairs(misseis_inimigos) do
@@ -204,21 +208,29 @@ function love.update(dt)
       end
     end
   end
+  if life_bar_width == 0 then
+    love.event.quit()
+  end
 end
 
 function love.draw()
-  love.graphics.setColor (0,255,0)
+  love.graphics.setColor(0, 255, 0)
   love.graphics.rectangle("fill", 0, 575, 800, 25)
+  love.graphics.rectangle("fill", 690, 10, life_bar_width, 25)
   player.draw()
   for n, inimigo in ipairs(inimigos) do
-      inimigos[n].draw()
+    inimigos[n].draw()
   end
   for i, missil in ipairs(misseis) do
-    love.graphics.setColor (255,255,0)
+    love.graphics.setColor(255, 255, 0)
     love.graphics.circle("fill", missil.px, missil.py, 5)
   end
   for i, missil in ipairs(misseis_inimigos) do
-    love.graphics.setColor (255,0,0)
+    love.graphics.setColor(255, 0, 0)
     love.graphics.circle("fill", missil.px, missil.py, 5)
+  end
+  for i, base_hit_x in ipairs(base_hits_x) do
+    love.graphics.setColor(0, 0, 0)
+    love.graphics.circle("fill", base_hit_x, 575, 10)
   end
 end
