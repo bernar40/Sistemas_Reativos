@@ -4,20 +4,21 @@ function wait (sec, objeto)
   coroutine.yield()
 end
 
-function inimigo (x1,y1,x2,y2,x3,y3, vel, id)
+function inimigo (x1,y1,x2,y2,x3,y3, vel, num)
+      local id = num
       local px1 = x1
       local py1 = y1
       local px2 = x2
       local py2 = y2
       local px3 = x3
       local py3 = y3
-      local hitbox_px = x1 - (x2-x1)/2
-      local hitbox_py = y1 - (y3-y1)/2
-      local width = (x2-x1)
-      local height = (y3-y1)
+      local width = (px2-px1)
+      local height = (py3-py1)/2 -- ou 1 para matar apenas no topo
+      local hitbox_px = px1
+      local hitbox_py = py1
       local is_hit = 0
   return {
-    update = coroutine.wrap (function (self, dt)
+    update = coroutine.wrap (function (self, dt, n)
       local width, height = love.graphics.getDimensions()
       while true do
  --       for n,enemy in ipairs(enemies) do
@@ -29,15 +30,19 @@ function inimigo (x1,y1,x2,y2,x3,y3, vel, id)
             px2 = 25
             px3 = 12.5
           end
-        hitbox_px = (px1- (px2-px1)/2) + vel*dt
+        hitbox_px = px1 + vel*dt
+        inimigo_x[n] = px3
+        inimigo_y[n] = py1
         wait(vel/1000, self)
       end
     end),
     collisao = 
-      function()
+      function(i)
         for n, missil in ipairs(misseis) do
           if checar_colisao(missil.hitbox_px, missil.hitbox_py, missil.width, missil.height, hitbox_px, hitbox_py, width, height) then
-            table.remove (inimigos, id)
+            is_hit = 1
+            table.remove(inimigo_x, i)
+            table.remove(inimigo_x, i)
             table.remove(misseis, n)
             break
           end
@@ -48,6 +53,20 @@ function inimigo (x1,y1,x2,y2,x3,y3, vel, id)
         if is_hit == 0 then
           love.graphics.setColor (255,0,0)
           love.graphics.polygon("fill", px1, py1, px2, py2, px3, py3)
+        else
+          hitbox_px = 0
+          hitbox_py = 0
+          width = 0
+          height = 0
+        end
+      end,
+    missil_ini = 
+      function(tempo_missil, n)
+        if tempo_missil < 0 then
+          if is_hit == 0 then
+            missil_inimigo_spawn(misseis_inimigos, inimigo_x, inimigo_y, 14) --math.random(1,#inimigos))
+            tempo_missil = math.random(0.5,2)
+          end
         end
       end
   }
@@ -81,16 +100,29 @@ function player (x,y,w,h)
   }
 end
 
+function missil_inimigo_spawn(misseis_ini, inimigo_x, inimigo_y, n)
+  x = inimigo_x[n]
+  y = inimigo_y[n]
+  table.insert(misseis_ini, {
+      px = x,
+      py = y,
+      hitbox_px = x,
+      hitbox_py = y,
+      width = 1,
+      height = 1
+    })
+end
+
 function missil_spawn(misseis)
-  x = player_x + (25)/2
-  y = player_y + (25)/2
+  x = player_x + 12.5
+  y = player_y + 12.5
   table.insert(misseis, {
       px = x,
       py = y,
       hitbox_px = x,
       hitbox_py = y,
-      width = 10,
-      height = 10
+      width = 1,
+      height = 1
     })
 end
 
@@ -99,19 +131,26 @@ function missil_move(dt, tab)
   tab.hitbox_py = tab.py
 end
 
+function missil_inimigo_move(dt, tab)
+  tab.py = tab.py + 150 * dt
+  tab.hitbox_py = tab.py
+end
+
 function checar_colisao (x1, y1, w1, h1, x2, y2, w2, h2)
   return x1 < x2+w2 and x2 < x1+w1 and y1 < y2+h2 and y2 < y1+h1
 end
 
 function love.load()
+  tempo_missil = math.random(0.5,2)
   player_x = 375
   player_y = 525
+  inimigo_x = {}
+  inimigo_y = {}
   misseis = {}
-  enemies = {}
+  misseis_inimigos = {}
   inimigos = {}
-  is_hit = {}
   player = player(player_x, player_y, 25, 25)
-  k=1
+  k = 1
   j = 1
   for i=1, 15 do
     if i<6 then
@@ -124,7 +163,7 @@ function love.load()
     if j%5==0 then
       j=0
     end
-    inimigos[i] = inimigo(0+(j*100), 100*k, 25+(j*100), 100*k, 12.5+(j*100), (100*k)+25, 25,i)
+    inimigos[i] = inimigo((j*100), 100*k, 25+(j*100), 100*k, 12.5+(j*100), (100*k)+25, 25*math.random(3, 6), i)
     j = j+1
   end
 end
@@ -136,16 +175,23 @@ end
 function love.update(dt)
   current_time = love.timer.getTime()
   player.update(dt)
+  tempo_missil = tempo_missil - dt
+  
   for n, inimigo in ipairs(inimigos) do
-      inimigos[n].update(inimigos[n], dt)
-      inimigos[n].collisao()
+      inimigos[n].update(inimigos[n], dt, n)
+      inimigos[n].collisao(n)
+      inimigos[n].missil_ini(tempo_missil, n)
   end
   for i, missil in ipairs(misseis) do
     missil_move(dt, missil)
-  end
-  for i, missil in ipairs(misseis) do
     if missil.py < 0 then -- remocao de misseis--     
       table.remove(misseis, i)
+    end
+  end
+  for i, missil in ipairs(misseis_inimigos) do
+    missil_inimigo_move(dt, missil)
+    if missil.py > 600 then -- remocao de misseis--     
+      table.remove(misseis_inimigos, i)
     end
   end
 end
@@ -161,8 +207,8 @@ function love.draw()
     love.graphics.setColor (255,255,0)
     love.graphics.circle("fill", missil.px, missil.py, 5)
   end
+  for i, missil in ipairs(misseis_inimigos) do
+    love.graphics.setColor (255,0,0)
+    love.graphics.circle("fill", missil.px, missil.py, 5)
+  end
 end
-
---[[ Fazer um ID pros inimigos, para quando deletar na colisao eles serem deletados pelo id. 
-     Por que o for eh do n do missil, entao nao pode por table.remove(inimigos, n). ]]--
-
