@@ -106,10 +106,10 @@ function missil_inimigo_spawn(misseis_ini, inimigo_x, inimigo_y, n)
   table.insert(misseis_ini, {
       px = x,
       py = y,
-      hitbox_px = x,
+      hitbox_px = x-5,
       hitbox_py = y,
-      width = 1,
-      height = 1
+      width = 10,
+      height = 3
     })
 end
 
@@ -119,10 +119,10 @@ function missil_spawn(misseis)
   table.insert(misseis, {
       px = x,
       py = y,
-      hitbox_px = x,
+      hitbox_px = x-5,
       hitbox_py = y,
-      width = 1,
-      height = 1
+      width = 10,
+      height = 3
     })
 end
 
@@ -180,21 +180,28 @@ function love.update(dt)
     x = math.random(1, #inimigos)
     inimigos[x].missil_ini(x)
   end
-  
   for n, inimigo in ipairs(inimigos) do
       inimigos[n].update(inimigos[n], dt, n)
       inimigos[n].collisao(n)
   end
   for i, missil in ipairs(misseis) do
     missil_move(dt, missil)
-    if missil.py < 0 then -- remocao de misseis--     
+    if missil.py < 0 then    
       table.remove(misseis, i)
     end
   end
   for i, missil in ipairs(misseis_inimigos) do
     missil_inimigo_move(dt, missil)
-    if missil.py > 600 then -- remocao de misseis--     
+    if missil.py > 600 then    
       table.remove(misseis_inimigos, i)
+    end
+  end
+  for i, missil_ini in ipairs(misseis_inimigos) do
+    for k, missil in ipairs(misseis) do
+      if checar_colisao(missil.hitbox_px, missil.hitbox_py, missil.width, missil.height, missil_ini.hitbox_px, missil_ini.hitbox_py, missil_ini.width, missil_ini.height) then
+        table.remove(misseis_inimigos, i)
+        table.remove(misseis, k)
+      end
     end
   end
 end
