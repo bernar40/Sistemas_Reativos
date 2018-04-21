@@ -4,7 +4,7 @@ function wait (sec, objeto)
   coroutine.yield()
 end
 
-function inimigo (x1,y1,x2,y2,x3,y3, vel)
+function inimigo (x1,y1,x2,y2,x3,y3, vel, id)
       local px1 = x1
       local py1 = y1
       local px2 = x2
@@ -25,9 +25,9 @@ function inimigo (x1,y1,x2,y2,x3,y3, vel)
           px2 = px2 + vel*dt
           px3 = px3 + vel*dt
           if px1 > width then 
-            px1 = x1
-            px2 = x2
-            px3 = x3
+            px1 = 0
+            px2 = 25
+            px3 = 12.5
           end
         hitbox_px = (px1- (px2-px1)/2) + vel*dt
         wait(vel/1000, self)
@@ -36,10 +36,9 @@ function inimigo (x1,y1,x2,y2,x3,y3, vel)
     collisao = 
       function()
         for n, missil in ipairs(misseis) do
-          if checar_colisao(missil.hitbox_px, missil.hitbox_py, missil.width, missil.height, hitbox_px, hitbox_py,                            width, height) then
-            is_hit = 1
-            table.remove(inimigos, n)
-            table.remove(misseis, i)
+          if checar_colisao(missil.hitbox_px, missil.hitbox_py, missil.width, missil.height, hitbox_px, hitbox_py, width, height) then
+            table.remove (inimigos, id)
+            table.remove(misseis, n)
             break
           end
         end
@@ -88,8 +87,8 @@ function missil_spawn(misseis)
   table.insert(misseis, {
       px = x,
       py = y,
-      hitbox_px = x - 5/2,
-      hitbox_py = y - 5/2,
+      hitbox_px = x,
+      hitbox_py = y,
       width = 10,
       height = 10
     })
@@ -112,9 +111,21 @@ function love.load()
   inimigos = {}
   is_hit = {}
   player = player(player_x, player_y, 25, 25)
-  for i=1, 5 do
-    inimigos[i] = inimigo(100+(i*100), 100, 125+(i*100), 100, 112.5+(i*100), 125, 500)
-    is_hit[i] = 0
+  k=1
+  j = 1
+  for i=1, 15 do
+    if i<6 then
+      k = 1
+    elseif i>5 and i<11 then
+      k = 2
+    else
+      k = 3
+    end
+    if j%5==0 then
+      j=0
+    end
+    inimigos[i] = inimigo(0+(j*100), 100*k, 25+(j*100), 100*k, 12.5+(j*100), (100*k)+25, 25,i)
+    j = j+1
   end
 end
     
@@ -150,5 +161,8 @@ function love.draw()
     love.graphics.setColor (255,255,0)
     love.graphics.circle("fill", missil.px, missil.py, 5)
   end
-
 end
+
+--[[ Fazer um ID pros inimigos, para quando deletar na colisao eles serem deletados pelo id. 
+     Por que o for eh do n do missil, entao nao pode por table.remove(inimigos, n). ]]--
+
