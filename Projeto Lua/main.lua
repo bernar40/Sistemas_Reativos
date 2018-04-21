@@ -61,12 +61,12 @@ function inimigo (x1,y1,x2,y2,x3,y3, vel, num)
         end
       end,
     missil_ini = 
-      function(tempo_missil, n)
+      function(n)
           if is_hit == 0 then
-            missil_inimigo_spawn(misseis_inimigos, inimigo_x, inimigo_y, 14) --math.random(1,#inimigos))
+            missil_inimigo_spawn(misseis_inimigos, inimigo_x, inimigo_y, n) --math.random(1,#inimigos))
             tempo_missil = math.random(0.5,2)
           else
-            tempo_missil = math.random(0.5,2)
+            tempo_missil = 0
           end
       end
   }
@@ -176,14 +176,14 @@ function love.update(dt)
   current_time = love.timer.getTime()
   player.update(dt)
   tempo_missil = tempo_missil - dt
+  if tempo_missil < 0 then
+    x = math.random(1, #inimigos)
+    inimigos[x].missil_ini(x)
+  end
   
   for n, inimigo in ipairs(inimigos) do
       inimigos[n].update(inimigos[n], dt, n)
       inimigos[n].collisao(n)
-      if tempo_missil < 0 then
-        inimigos[n].missil_ini(n)
-        tempo_missil = math.random(0.5,2)
-      end
   end
   for i, missil in ipairs(misseis) do
     missil_move(dt, missil)
