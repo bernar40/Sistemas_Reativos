@@ -44,6 +44,7 @@ function inimigo (x1,y1,x2,y2,x3,y3, vel, num)
             table.remove(inimigo_x, i)
             table.remove(misseis, n)
             invaderkilled:play()
+            qtd_inimigos = qtd_inimigos - 1
             break
           end
         end
@@ -158,6 +159,7 @@ function love.load()
   misseis = {}
   misseis_inimigos = {}
   inimigos = {}
+  qtd_inimigos = 15
   player = player(player_x, player_y, 25, 25)
   k = 1
   j = 1
@@ -182,9 +184,13 @@ end
 function love.keypressed(key)
   if gamestate == "playing" then
     player.keypressed(key)
-  else
+  elseif gamestate == "menu" then
     if key == 'return' then
       gamestate = "playing"
+    end
+  else
+    if key == 'return' then
+      love.event.quit()
     end
   end
 end
@@ -227,26 +233,20 @@ function love.update(dt)
         end
       end
     end
-    if life_bar_width == 0 then
+    if life_bar_width == 0 or qtd_inimigos == 0 then
       gamestate = "gameover"
     end
     
-  elseif gamestate == "menu" then
-    
-    
-    
-  elseif gamestate == "gameover" then
-    love.event.quit()
   end
 end
 
 function love.draw()
   if gamestate == "playing" then
     
-    love.graphics.setColor(255, 255, 255)
+    love.graphics.setColor(1, 1, 1)
     love.graphics.print("LIFE", 690, 45)
     love.graphics.print(life_bar_width, 690, 65)
-    love.graphics.setColor(0, 255, 0)
+    love.graphics.setColor(0, 1, 0)
     love.graphics.rectangle("fill", 0, 575, 800, 25)
     love.graphics.rectangle("fill", 690, 10, life_bar_width, 25)
     player.draw()
@@ -254,11 +254,11 @@ function love.draw()
       inimigos[n].draw()
     end
     for i, missil in ipairs(misseis) do
-      love.graphics.setColor(255, 255, 0)
+      love.graphics.setColor(1, 1, 0)
       love.graphics.circle("fill", missil.px, missil.py, 5)
     end
     for i, missil in ipairs(misseis_inimigos) do
-      love.graphics.setColor(255, 0, 0)
+      love.graphics.setColor(1, 0, 0)
       love.graphics.circle("fill", missil.px, missil.py, 5)
     end
     for i, base_hit_x in ipairs(base_hits_x) do
@@ -268,11 +268,35 @@ function love.draw()
     
   elseif gamestate == "menu" then
     
-    love.graphics.setColor(255, 255, 255)
+    love.graphics.setColor(1, 1, 1)
     love.graphics.print("PRESS ENTER", 180, 200, 0, 2, 2)
     love.graphics.print("TO BEGIN GAME", 150, 300, 0, 2, 2)
     
-  elseif gamestate == "gameover" then
+  else
+    
+    love.graphics.setColor(0.3, 0.3, 0.3)
+    love.graphics.print("LIFE", 690, 45)
+    love.graphics.print(life_bar_width, 690, 65)
+    love.graphics.setColor(0, 0.3, 0)
+    love.graphics.rectangle("fill", 0, 575, 800, 25)
+    love.graphics.rectangle("fill", 690, 10, life_bar_width, 25)
+    
+    for i, base_hit_x in ipairs(base_hits_x) do
+      love.graphics.setColor(0, 0, 0)
+      love.graphics.circle("fill", base_hit_x, 575, 10)
+    end
+    
+    if life_bar_width == 0 then
+      love.graphics.setColor(1, 1, 1)
+      love.graphics.print("GAME OVER", 210, 200, 0, 2, 2)
+      love.graphics.print("PRESS ENTER TO", 130, 300, 0, 2, 2)
+      love.graphics.print("QUIT GAME", 230, 400, 0, 2, 2)
+    else
+      love.graphics.setColor(1, 1, 1)
+      love.graphics.print("YOU WON", 250, 200, 0, 2, 2)
+      love.graphics.print("PRESS ENTER TO", 150, 300, 0, 2, 2)
+      love.graphics.print("QUIT GAME", 230, 400, 0, 2, 2)
+    end
     
   end
 end
