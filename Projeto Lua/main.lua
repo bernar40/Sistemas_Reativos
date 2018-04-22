@@ -1,9 +1,11 @@
 function wait (sec, objeto)
+  objeto.state = 0 --inativo
   objeto.wait_until = current_time+sec
   coroutine.yield()
 end
 
 function inimigo (x1,y1,x2,y2,x3,y3, vel, num)
+      local state = 1
       local id = num
       local px1 = x1
       local py1 = y1
@@ -17,6 +19,7 @@ function inimigo (x1,y1,x2,y2,x3,y3, vel, num)
       local hitbox_py = py1
       local is_hit = 0
   return {
+    wait_until = 0,
     update = coroutine.wrap (function (self, dt, n)
       local width, height = love.graphics.getDimensions()
       while true do
@@ -32,7 +35,7 @@ function inimigo (x1,y1,x2,y2,x3,y3, vel, num)
         hitbox_px = px1 + vel*dt
         inimigo_x[n] = px3
         inimigo_y[n] = py1
-        wait(vel/1000, self)
+        wait(1/1000000000000, self)
       end
     end),
     collisao = 
@@ -69,6 +72,14 @@ function inimigo (x1,y1,x2,y2,x3,y3, vel, num)
           else
             tempo_missil = 0
           end
+      end,
+    is_active = 
+      function ()
+        if state == 1 then
+          return true
+        else
+          return false
+        end
       end
   }
 end
@@ -176,7 +187,7 @@ function love.load()
     if j%5==0 then
       j=0
     end
-    inimigos[i] = inimigo((j*100), 100*k, 25+(j*100), 100*k, 12.5+(j*100), (100*k)+25, 25*math.random(3, 6), i)
+    inimigos[i] = inimigo((j*100), 100*k, 25+(j*100), 100*k, 12.5+(j*100), (100*k)+25, 300*math.random(3, 6), i)
     j = j+1
   end
 end
@@ -206,8 +217,14 @@ function love.update(dt)
       inimigos[x].missil_ini(x)
     end
     for n, inimigo in ipairs(inimigos) do
-        inimigos[n].update(inimigos[n], dt, n)
-        inimigos[n].collisao(n)
+      if inimigos[n].state == 1 then
+       inimigos[n].update(inimigos[n], dt, n)
+      else
+        if current_time > inimigos[n].wait_until then
+          inimigos[n].state = 1
+        end
+      end
+      inimigos[n].collisao(n)
     end
     for i, missil in ipairs(misseis) do
       missil_move(dt, missil)
