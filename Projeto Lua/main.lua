@@ -43,6 +43,7 @@ function inimigo (x1,y1,x2,y2,x3,y3, vel, num)
         for n, missil in ipairs(misseis) do
           if checar_colisao(missil.hitbox_px, missil.hitbox_py, missil.width, missil.height, hitbox_px, hitbox_py, width, height) then
             is_hit = 1
+            qtd_missil = qtd_missil + 1
             table.remove(inimigo_x, i)
             table.remove(inimigo_x, i)
             table.remove(misseis, n)
@@ -106,7 +107,10 @@ function player (x,y,w,h)
     keypressed = 
       function(key)
         if key == "up" then
-          missil_spawn(misseis)
+          if qtd_missil > 0 then
+            qtd_missil = qtd_missil - 1
+            missil_spawn(misseis)
+          end
         end
       end
   }
@@ -123,7 +127,7 @@ function missil_inimigo_spawn(misseis_ini, inimigo_x, inimigo_y, n)
       width = 10,
       height = 3
     })
-  shoot:play()
+  shoot_enemy:play()
 end
 
 function missil_spawn(misseis)
@@ -137,7 +141,7 @@ function missil_spawn(misseis)
       width = 10,
       height = 3
     })
-  shoot:play()
+  shoot_ship:play()
 end
 
 function missil_move(dt, tab)
@@ -155,11 +159,14 @@ function checar_colisao (x1, y1, w1, h1, x2, y2, w2, h2)
 end
 
 function love.load()
+  qtd_missil = 5
   gamestate = "menu"
-  shoot = love.audio.newSource("shoot.wav", "static")
+  shoot_enemy = love.audio.newSource("shoot.wav", "static")
+  shoot_ship = love.audio.newSource("blip.wav", "static")
   invaderkilled = love.audio.newSource("invaderkilled.wav", "static")
   explosion = love.audio.newSource("explosion.wav", "static")
-  shoot:setVolume(0.5)
+  shoot_enemy:setVolume(0.5)
+  shoot_ship:setVolume(0.5)
   love.graphics.setFont(love.graphics.newFont("8-BIT WONDER.ttf", 20))
   
   tempo_missil = math.random(0.5,2)
@@ -229,6 +236,7 @@ function love.update(dt)
     for i, missil in ipairs(misseis) do
       missil_move(dt, missil)
       if missil.py < 0 then
+        qtd_missil = qtd_missil + 1
         table.remove(misseis, i)
       end
     end
@@ -244,6 +252,7 @@ function love.update(dt)
     for i, missil_ini in ipairs(misseis_inimigos) do
       for k, missil in ipairs(misseis) do
         if checar_colisao(missil.hitbox_px, missil.hitbox_py, missil.width, missil.height, missil_ini.hitbox_px, missil_ini.hitbox_py, missil_ini.width, missil_ini.height) then
+          qtd_missil = qtd_missil + 1
           table.remove(misseis_inimigos, i)
           table.remove(misseis, k)
           invaderkilled:play()
