@@ -1,5 +1,4 @@
 function wait (sec, objeto)
---  objeto.state = 0
   objeto.wait_until = current_time+sec
   coroutine.yield()
 end
@@ -44,6 +43,7 @@ function inimigo (x1,y1,x2,y2,x3,y3, vel, num)
             table.remove(inimigo_x, i)
             table.remove(inimigo_x, i)
             table.remove(misseis, n)
+            invaderkilled:play()
             break
           end
         end
@@ -111,6 +111,7 @@ function missil_inimigo_spawn(misseis_ini, inimigo_x, inimigo_y, n)
       width = 10,
       height = 3
     })
+  shoot:play()
 end
 
 function missil_spawn(misseis)
@@ -124,6 +125,7 @@ function missil_spawn(misseis)
       width = 10,
       height = 3
     })
+  shoot:play()
 end
 
 function missil_move(dt, tab)
@@ -141,6 +143,13 @@ function checar_colisao (x1, y1, w1, h1, x2, y2, w2, h2)
 end
 
 function love.load()
+  gamestate = "menu"
+  shoot = love.audio.newSource("shoot.wav", "static")
+  invaderkilled = love.audio.newSource("invaderkilled.wav", "static")
+  explosion = love.audio.newSource("explosion.wav", "static")
+  shoot:setVolume(0.5)
+  love.graphics.setFont(love.graphics.newFont("8-BIT WONDER.ttf", 20))
+  
   tempo_missil = math.random(0.5,2)
   player_x = 375
   player_y = 525
@@ -171,66 +180,99 @@ function love.load()
 end
     
 function love.keypressed(key)
-  player.keypressed(key)
+  if gamestate == "playing" then
+    player.keypressed(key)
+  else
+    if key == 'return' then
+      gamestate = "playing"
+    end
+  end
 end
 
 function love.update(dt)
-  current_time = love.timer.getTime()
-  player.update(dt)
-  tempo_missil = tempo_missil - dt
-  if tempo_missil < 0 then
-    x = math.random(1, #inimigos)
-    inimigos[x].missil_ini(x)
-  end
-  for n, inimigo in ipairs(inimigos) do
-      inimigos[n].update(inimigos[n], dt, n)
-      inimigos[n].collisao(n)
-  end
-  for i, missil in ipairs(misseis) do
-    missil_move(dt, missil)
-    if missil.py < 0 then    
-      table.remove(misseis, i)
+  if gamestate == "playing" then
+    
+    current_time = love.timer.getTime()
+    player.update(dt)
+    tempo_missil = tempo_missil - dt
+    if tempo_missil < 0 then
+      x = math.random(1, #inimigos)
+      inimigos[x].missil_ini(x)
     end
-  end
-  for i, missil in ipairs(misseis_inimigos) do
-    missil_inimigo_move(dt, missil)
-    if missil.py > 575 then  --
-      table.remove(misseis_inimigos, i)
-      table.insert(base_hits_x, missil.px)
-      life_bar_width = life_bar_width - 10
+    for n, inimigo in ipairs(inimigos) do
+        inimigos[n].update(inimigos[n], dt, n)
+        inimigos[n].collisao(n)
     end
-  end
-  for i, missil_ini in ipairs(misseis_inimigos) do
-    for k, missil in ipairs(misseis) do
-      if checar_colisao(missil.hitbox_px, missil.hitbox_py, missil.width, missil.height, missil_ini.hitbox_px, missil_ini.hitbox_py, missil_ini.width, missil_ini.height) then
-        table.remove(misseis_inimigos, i)
-        table.remove(misseis, k)
+    for i, missil in ipairs(misseis) do
+      missil_move(dt, missil)
+      if missil.py < 0 then
+        table.remove(misseis, i)
       end
     end
-  end
-  if life_bar_width == 0 then
+    for i, missil in ipairs(misseis_inimigos) do
+      missil_inimigo_move(dt, missil)
+      if missil.py > 575 then
+        table.remove(misseis_inimigos, i)
+        table.insert(base_hits_x, missil.px)
+        explosion:play()
+        life_bar_width = life_bar_width - 10
+      end
+    end
+    for i, missil_ini in ipairs(misseis_inimigos) do
+      for k, missil in ipairs(misseis) do
+        if checar_colisao(missil.hitbox_px, missil.hitbox_py, missil.width, missil.height, missil_ini.hitbox_px, missil_ini.hitbox_py, missil_ini.width, missil_ini.height) then
+          table.remove(misseis_inimigos, i)
+          table.remove(misseis, k)
+          invaderkilled:play()
+        end
+      end
+    end
+    if life_bar_width == 0 then
+      gamestate = "gameover"
+    end
+    
+  elseif gamestate == "menu" then
+    
+    
+    
+  elseif gamestate == "gameover" then
     love.event.quit()
   end
 end
 
 function love.draw()
-  love.graphics.setColor(0, 255, 0)
-  love.graphics.rectangle("fill", 0, 575, 800, 25)
-  love.graphics.rectangle("fill", 690, 10, life_bar_width, 25)
-  player.draw()
-  for n, inimigo in ipairs(inimigos) do
-    inimigos[n].draw()
-  end
-  for i, missil in ipairs(misseis) do
-    love.graphics.setColor(255, 255, 0)
-    love.graphics.circle("fill", missil.px, missil.py, 5)
-  end
-  for i, missil in ipairs(misseis_inimigos) do
-    love.graphics.setColor(255, 0, 0)
-    love.graphics.circle("fill", missil.px, missil.py, 5)
-  end
-  for i, base_hit_x in ipairs(base_hits_x) do
-    love.graphics.setColor(0, 0, 0)
-    love.graphics.circle("fill", base_hit_x, 575, 10)
+  if gamestate == "playing" then
+    
+    love.graphics.setColor(255, 255, 255)
+    love.graphics.print("LIFE", 690, 45)
+    love.graphics.print(life_bar_width, 690, 65)
+    love.graphics.setColor(0, 255, 0)
+    love.graphics.rectangle("fill", 0, 575, 800, 25)
+    love.graphics.rectangle("fill", 690, 10, life_bar_width, 25)
+    player.draw()
+    for n, inimigo in ipairs(inimigos) do
+      inimigos[n].draw()
+    end
+    for i, missil in ipairs(misseis) do
+      love.graphics.setColor(255, 255, 0)
+      love.graphics.circle("fill", missil.px, missil.py, 5)
+    end
+    for i, missil in ipairs(misseis_inimigos) do
+      love.graphics.setColor(255, 0, 0)
+      love.graphics.circle("fill", missil.px, missil.py, 5)
+    end
+    for i, base_hit_x in ipairs(base_hits_x) do
+      love.graphics.setColor(0, 0, 0)
+      love.graphics.circle("fill", base_hit_x, 575, 10)
+    end
+    
+  elseif gamestate == "menu" then
+    
+    love.graphics.setColor(255, 255, 255)
+    love.graphics.print("PRESS ENTER", 180, 200, 0, 2, 2)
+    love.graphics.print("TO BEGIN GAME", 150, 300, 0, 2, 2)
+    
+  elseif gamestate == "gameover" then
+    
   end
 end
