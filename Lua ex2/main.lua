@@ -1,19 +1,24 @@
-wait (segundos, meublip)
-  
+function wait (sec, blip)
+  blip.state = 0 --inativo
+  blip.wait_until = current_time + sec
+  coroutine.yield()
 end
 
-function newblip (vel)
-  local x, y = 0, 0
+function newblip (sec)
+  local x, y = 0, 0 
+  local state = 1 -- 1 para ativo, 0 para inativo
   return {
-    update = coroutine.wrap (function (self)
+    update = coroutine.wrap(function (self)
       while true do
-        local width, height = love.graphics.getDimensions()
-        x = x + vel
-        if x > width then x = 0 end
-        wait(vel/100, self)
+        local width, height = love.graphics.getDimensions( )
+        x = x+sec
+        if x > width then
+          -- volta para a esquerda da janela
+          x = 0
+        end
+        wait(sec/100,self)
       end
     end),
-  
     affected = function (pos)
       if pos>x and pos<x+10 then
       -- "pegou" o blip
@@ -24,7 +29,14 @@ function newblip (vel)
     end,
     draw = function ()
       love.graphics.rectangle("line", x, y, 10, 10)
-    end
+    end,
+    is_active = function ()
+      if state == 1 then
+        return true
+      else
+        return false
+      end
+    wait_until = 0
   }
 end
 
@@ -64,7 +76,7 @@ function love.load()
   player =  newplayer()
   listabls = {}
   for i = 1, 5 do
-    listabls[i] = newblip(i)
+    listabls[i] = newblip(math.random(1,10))
   end
 end
 
@@ -76,9 +88,16 @@ function love.draw()
 end
 
 function love.update(dt)
+  current_time = love.timer.getTime()
   player.update(dt)
   for i = 1,#listabls do
-    listabls[i].update()
+    if listabls[i].state == 1 then
+      listabls[i].update(listabls[i])
+    else
+      if current_time > listabls[i].wait_until then
+        listabls[i].state = 1
+      end
+    end
   end
 end
   
