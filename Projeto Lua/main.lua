@@ -35,7 +35,7 @@ function inimigo (x1,y1,x2,y2,x3,y3, vel, num)
         hitbox_px = px1 + vel*dt
         inimigo_x[n] = px3
         inimigo_y[n] = py1
-        wait(1/1000000000000, self)
+        wait(1/1000, self)
       end
     end),
     collisao = 
