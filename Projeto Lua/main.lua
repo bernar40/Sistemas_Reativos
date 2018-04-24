@@ -270,10 +270,10 @@ end
 function love.draw()
   if gamestate == "playing" then
     
-    love.graphics.setColor(1, 1, 1)
+    love.graphics.setColor(255, 255, 255)
     love.graphics.print("LIFE", 690, 45)
     love.graphics.print(life_bar_width, 690, 65)
-    love.graphics.setColor(0, 1, 0)
+    love.graphics.setColor(0, 255, 0)
     love.graphics.rectangle("fill", 0, 575, 800, 25)
     love.graphics.rectangle("fill", 690, 10, life_bar_width, 25)
     player.draw()
@@ -281,11 +281,11 @@ function love.draw()
       inimigos[n].draw()
     end
     for i, missil in ipairs(misseis) do
-      love.graphics.setColor(1, 1, 0)
+      love.graphics.setColor(255, 255, 0)
       love.graphics.circle("fill", missil.px, missil.py, 5)
     end
     for i, missil in ipairs(misseis_inimigos) do
-      love.graphics.setColor(1, 0, 0)
+      love.graphics.setColor(255, 0, 0)
       love.graphics.circle("fill", missil.px, missil.py, 5)
     end
     for i, base_hit_x in ipairs(base_hits_x) do
@@ -295,16 +295,16 @@ function love.draw()
     
   elseif gamestate == "menu" then
     
-    love.graphics.setColor(1, 1, 1)
+    love.graphics.setColor(255, 255, 255)
     love.graphics.print("PRESS ENTER", 180, 200, 0, 2, 2)
     love.graphics.print("TO BEGIN GAME", 150, 300, 0, 2, 2)
     
   else
     
-    love.graphics.setColor(0.3, 0.3, 0.3)
+    love.graphics.setColor(0, 0, 0)
     love.graphics.print("LIFE", 690, 45)
     love.graphics.print(life_bar_width, 690, 65)
-    love.graphics.setColor(0, 0.3, 0)
+    love.graphics.setColor(0, 0, 0)
     love.graphics.rectangle("fill", 0, 575, 800, 25)
     love.graphics.rectangle("fill", 690, 10, life_bar_width, 25)
     
@@ -314,12 +314,12 @@ function love.draw()
     end
     
     if life_bar_width == 0 then
-      love.graphics.setColor(1, 1, 1)
+      love.graphics.setColor(255, 255, 255)
       love.graphics.print("GAME OVER", 210, 200, 0, 2, 2)
       love.graphics.print("PRESS ENTER TO", 130, 300, 0, 2, 2)
       love.graphics.print("QUIT GAME", 230, 400, 0, 2, 2)
     else
-      love.graphics.setColor(1, 1, 1)
+      love.graphics.setColor(255, 255, 255)
       love.graphics.print("YOU WON", 250, 200, 0, 2, 2)
       love.graphics.print("PRESS ENTER TO", 150, 300, 0, 2, 2)
       love.graphics.print("QUIT GAME", 230, 400, 0, 2, 2)
