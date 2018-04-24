@@ -161,6 +161,7 @@ end
 function love.load()
   qtd_missil = 5
   gamestate = "menu"
+  love.window.setTitle("Trinvaders")
   shoot_enemy = love.audio.newSource("shoot.wav", "static")
   shoot_ship = love.audio.newSource("blip.wav", "static")
   invaderkilled = love.audio.newSource("invaderkilled.wav", "static")
