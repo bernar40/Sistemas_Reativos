@@ -301,10 +301,10 @@ function love.draw()
     
   else
     
-    love.graphics.setColor(0, 0, 0)
+    love.graphics.setColor(125, 125, 125)
     love.graphics.print("LIFE", 690, 45)
     love.graphics.print(life_bar_width, 690, 65)
-    love.graphics.setColor(0, 0, 0)
+    love.graphics.setColor(0, 125, 0)
     love.graphics.rectangle("fill", 0, 575, 800, 25)
     love.graphics.rectangle("fill", 690, 10, life_bar_width, 25)
     
