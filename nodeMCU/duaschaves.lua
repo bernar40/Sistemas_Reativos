@@ -1,6 +1,6 @@
 ledstate = false
 timeinterval = 1000
-buttoninterval = 500
+buttoninterval = 500000
 button1time = 0
 button2time = 0
 
@@ -29,16 +29,18 @@ function rapidon ()
   return
   function (level, timestamp)
     local now = tmr.now()
-    if now - last < delay then return end
     button1time = now
+    if now - last < delay then return end
+    last = now
     
     if now - button2time < buttoninterval then
       turnoff()
-      return
+      print("off")
     end
     
     timeinterval = timeinterval - 200
     tmr.interval(mytimer, timeinterval)
+    print(timeinterval)
   end
 end
 
@@ -48,16 +50,18 @@ function devagaron ()
   return
   function (level, timestamp)
     local now = tmr.now()
-    if now - last < delay then return end
     button2time = now
+    if now - last < delay then return end
+    last = now
     
     if now - button1time < buttoninterval then
       turnoff()
-      return
+      print("off")
     end
     
     timeinterval = timeinterval + 200
     tmr.interval(mytimer, timeinterval)
+    print(timeinterval)
   end
 end
 
