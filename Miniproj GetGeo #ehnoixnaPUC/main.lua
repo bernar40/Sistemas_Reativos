@@ -7,23 +7,6 @@ wificonf = {
   save = false
 }
 
-function love.load()
-  controle = false
-  mqtt_client = mqtt.client.create("test.mosquitto.org", 1883, mqttcb)
-  mqtt_client:connect("1511651")
-  mqtt_client:subscribe({"apertou-tecla"})
-  ret1 = retangulo(50, 200, 200, 150)
-  
-  wifi.sta.config(wificonf)
-  print("modo: ".. wifi.setmode(wifi.STATION))
-  print(wifi.sta.getip())
-  
-  sw1 = 1
-  gpio.mode(sw1,gpio.INT,gpio.PULLUP)
-  m = mqtt.Client("1511651", 120)
-  
-end
-
 function publica(c)
   c:publish("alos","alo do nodemcu!",0,0, 
             function(client) print("mandou!") end)
@@ -34,10 +17,25 @@ function conectado (client)
   client:subscribe("alos", 0, novaInscricao)
 end
 
-m:connect("192.168.0.2", 1883, 0, 
+function love.load()
+  controle = false
+  --mqtt_client = mqtt.client.create("test.mosquitto.org", 1883, mqttcb)
+  --mqtt_client:connect("1511651")
+  --mqtt_client:subscribe({"apertou-tecla"})
+  ret1 = retangulo(50, 200, 200, 150)
+  
+  wifi.sta.config(wificonf)
+  print("modo: ".. wifi.setmode(wifi.STATION))
+  print(wifi.sta.getip())
+  
+  sw1 = 1
+  gpio.mode(sw1,gpio.INT,gpio.PULLUP)
+  m = mqtt.Client("test.mosquitto.org", 120)
+  m:connect("1511651", 1883, mqttcb, 
              conectado,
              function(client, reason) print("failed reason: "..reason) end)
-
+  
+end
 
 -- Print AP list that is easier to read
 function listap(t) -- (SSID : Authmode, RSSI, BSSID, Channel)
