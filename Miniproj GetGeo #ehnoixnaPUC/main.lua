@@ -4,8 +4,8 @@ love.window.setTitle("NodeMCU LatLong - Bernardo & Alexandre")
 function mqttcb (topic, message)
   print("Received from topic: " .. topic .. " - message:" .. message)
   space = string.find(message, " ")
-  lat = string.sub(message, 1, space1-1)
-  long = string.sub(message, space1+1, string.len(message))
+  lat = string.sub(message, 1, space-1)
+  long = string.sub(message, space+1, string.len(message))
   recieved = 1
 end
 
