@@ -18,7 +18,7 @@ function publica(c, localizacaoMsg)
 end
 
 
-function Lovecallback(c)
+function Love_callback(c)
     local function mensagemLove(userdata, topic, message)
             if(message == "Pedido de localizacao") then
                 gpio.write(led_r, gpio.HIGH)
@@ -32,7 +32,7 @@ end
 function conectado (c)
     c:publish("Sucesso", "NodeMCU Conectou.", 0,  0, 
                   function(client, reason) print("Conexão estabelecida") end)
-    c:subscribe("PedidoLove", 0, Lovecallback)
+    c:subscribe("PedidoLove", 0, Love_callback)
 end 
 
 function Parse_Data(data)
@@ -100,7 +100,7 @@ function listap(t) -- (SSID : Authmode, RSSI, BSSID, Channel)
       gpio.write(led_r, gpio.LOW)
 end
 
-function buttonpressed()
+function Button_pressed()
     local delay = 500000
     local last = 0
     return
@@ -112,7 +112,7 @@ function buttonpressed()
             wifi.sta.getap(listap)
     end
 end
-gpio.trig(sw1, "down", buttonpressed())
+gpio.trig(sw1, "down", Button_pressed())
 
 m:connect("test.mosquitto.org", 1883, 0, 
              conectado,
