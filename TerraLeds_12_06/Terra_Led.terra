@@ -1,0 +1,78 @@
+//Bernardo Ruga - 1511651
+//Alexandre Wanick - 1512647
+
+
+#include "/home/terra/TerraNG/terra/TerraNet.defs"
+
+pktype usrMsg from radioMsg with
+    var ushort d;
+end
+
+var ushort node_id = getNodeId();
+var ushort best_neighbour = 0;
+var ushort smallest_d = 9999;
+var ushort v = 0;
+var usrMsg sent_data;
+var usrMsg received_data;
+
+sent_data.target = BROADCAST;
+sent_data.source = node_id;
+sent_data.d = 0;
+
+par do
+    loop do
+        par/and do
+            emit REQ_VOLTS();
+            v = await VOLTS;
+            if v >= 1010 or v <= 990 then
+                emit LED0(ON);
+                inc sent_data.d;
+                emit SEND(sent_data);
+                await SEND_DONE;
+            else
+                emit LED0(OFF);
+            end
+        with
+            await 30s;
+        end
+    end
+with
+    par do
+        loop do
+            received_data = await RECEIVE;
+            if received_data.d < smallest_d then
+                smallest_d = received_data.d;
+                best_neighbour = received_data.source;
+                qPut(received_data);
+            end
+        end
+    with
+        loop do
+            await Q_READY;
+            loop do
+                if not qSize() then
+                    break;
+                end
+                qGet(received_data);
+                emit LED2(ON);
+                await 3s;
+				received_data.source = node_id;
+                inc received_data.d;
+                emit SEND(received_data);
+                await SEND_DONE;
+                emit LED2(OFF);
+            end
+        end
+    end
+with
+    loop do
+        var ushort div = best_neighbour / 10;
+		emit LEDS(div);
+        await 3s;
+        var ushort resto = best_neighbour % 10;
+        emit LEDS(resto);
+        await 3s;
+        emit LEDS(OFF);
+        await 3s;
+    end
+end
