@@ -9,8 +9,8 @@ function mqttcb (topic, message)
   end
 end
 
-function checar_colisao (x1, y1, w1, h1, x2, y2, w2, h2)
-  return x1 < x2+w2 and x2 < x1+w1 and y1 < y2+h2 and y2 < y1+h1
+function checar_colisao2 (x1, y1, w1, x2, w2)
+  return x1 < x2+w2 and x2 < x1+w1 and y1>=400
 end
 
 function player (x,y,w,h)
@@ -19,7 +19,7 @@ function player (x,y,w,h)
   return {
     draw =
       function ()
-        if playerColour == "red" then
+        if playerColour == 0 then
           love.graphics.setColor(204, 0, 0)
         else
           love.graphics.setColor(0, 204, 102)
@@ -38,6 +38,7 @@ function player (x,y,w,h)
 
         if pula == true then
           ry = ry + (100 * dt * jump)
+          player_y = ry
           if ry <= 350 then
             jump = 1
           elseif ry >= 401 then
@@ -45,13 +46,30 @@ function player (x,y,w,h)
             pula = false
           end
         end
-        if mudaCor == true then
+        --[[if mudaCor == true then
           if playerColour == "red" then
             playerColour = "green"
           else
             playerColour = "red"
           end
           mudaCor = false
+        end]]--
+      end,
+    keypressed = 
+      function (key)
+        if key == "left" then
+          mudaCor = true
+          if mudaCor == true then
+            if playerColour == 0 then
+              playerColour = 1
+            else
+              playerColour = 0
+            end
+            mudaCor = false
+          end
+        end
+        if key == "right" then
+          pula = true
         end
       end
   }
@@ -85,32 +103,26 @@ function enemy (enemy_type, x, y)
       function (rand)
         if enemy_type == 1 then
           for i = 1, 10, 1 do
-            --[[if rand [i] == 0 then
+            if rand [i] == 0 then
               love.graphics.setColor(204, 0, 0)
             else
               love.graphics.setColor(0, 204, 102)
-            end]]--
-            if i < 6 then
-              love.graphics.setColor(204, 0, 0)
-              love.graphics.rectangle("fill", rx + ((i-1)*100) , ry-(i*22), 40, 20)
             end
-            if i > 5 then
-              love.graphics.setColor(0, 204, 102)
-              love.graphics.rectangle("fill", rx + ((i-1)*100) , ry+(i*22) - (11*22), 40, 20)
-            end
-          end
-
-          for i = 0,36,1 do
-            love.graphics.setColor(100, 100, 100)
-            love.graphics.polygon("fill", rx+i*25, ry+20, (rx+15)+i*25, ry, (rx+30)+i*25, ry+20)
-            love.graphics.setColor(255, 255, 255)
-            love.graphics.polygon("line", rx+i*25, ry+20, (rx+15)+i*25, ry, (rx+30)+i*25, ry+20)
+              love.graphics.rectangle("fill", rx + ((i-1)*130) , ry-100, 80, 200)
+              table.insert(enemy1_x1, rx + ((i-1)*130))
+              table.insert(enemy1_y1, ry-100)
+              table.insert(enemy1_w, 80)
+              table.insert(enemy1_h, 200)
           end
         end
         if enemy_type == 2 then
           for i = 0,3,1 do
             love.graphics.setColor(r, g, b)
             love.graphics.rectangle("fill", rx + (i * 120), ry, 60, 40)
+            table.insert(enemy2_x1, rx + (i * 120))
+            table.insert(enemy2_y1, ry)
+            table.insert(enemy2_w, 60)
+            table.insert(enemy2_h, 40)
           end
         end
         if enemy_type == 3 then
@@ -119,12 +131,20 @@ function enemy (enemy_type, x, y)
             love.graphics.polygon("fill", rx + (i * 200), ry2, (rx+15)+(i*200), ry2-30, (rx+30)+(i*200), ry2)
             love.graphics.setColor(255, 255, 255)
             love.graphics.polygon("line", rx + (i * 200), ry2, (rx+15)+(i*200), ry2-30, (rx+30)+(i*200), ry2)
+            table.insert(enemy4_x1, rx + (i * 200))
+            table.insert(enemy4_y1, ry2)
+            table.insert(enemy4_w, 30)
+            table.insert(enemy4_h, 15)
             if rand[i] == 0 then
               love.graphics.setColor(204, 0, 0)
             else
             love.graphics.setColor(0, 204, 102)
             end          
             love.graphics.rectangle("fill", rx + (i * 200), ry-100, 30, 100)
+            table.insert(enemy3_x1, rx + (i * 200))
+            table.insert(enemy3_y1, ry-100)
+            table.insert(enemy3_w, 30)
+            table.insert(enemy3_h, 100)
           end
         end
       end,
@@ -132,6 +152,11 @@ function enemy (enemy_type, x, y)
       function (dt)
         if enemy_type == 1 then
           rx = rx - 100 * dt
+          for i = 1, 10, 1 do
+            if enemy1_x1[i] ~= nil then
+              enemy1_x1[i] = enemy1_x1[i] - 100 * dt
+            end
+          end
           if rx <= -940 then
             enemyFlag = false
             randEnemy = math.random(1, 3)
@@ -139,10 +164,19 @@ function enemy (enemy_type, x, y)
             enemies[1] = enemy(1, 600, 407)
             enemies[2] = enemy(2, 600, 427)
             enemies[3] = enemy(3, 600, 427)
+            enemy1_x1 = {}
+            enemy1_y1 = {}
+            enemy1_w = {}
+            enemy1_h = {} 
           end
         end
         if enemy_type == 2 then
           rx = rx - 100 * dt
+          for i = 1, 4, 1 do
+            if enemy2_x1[i] ~= nil then
+              enemy2_x1[i] = enemy2_x1[i] - 100 * dt
+            end
+          end
           if rx <= -490 then
             enemyFlag = false
             randEnemy = math.random(1, 3)
@@ -150,10 +184,32 @@ function enemy (enemy_type, x, y)
             enemies[1] = enemy(1, 600, 407)
             enemies[2] = enemy(2, 600, 427)
             enemies[3] = enemy(3, 600, 427)
+            enemy2_x1 = {}
+            enemy2_y1 = {}
+            enemy2_w = {}
+            enemy2_h = {} 
           end
         end
         if enemy_type == 3 then
           rx = rx - 100 * dt
+          if enemy3_x1[1] ~= nil then
+            enemy3_x1[1] = enemy3_x1[1] - 100 * dt
+          end
+          if enemy3_x1[2] ~= nil then
+            enemy3_x1[2] = enemy3_x1[2] - 100 * dt
+          end
+          if enemy3_x1[1] ~= nil then
+            enemy3_x1[3] = enemy3_x1[3] - 100 * dt
+          end
+          if enemy4_x1[1] ~= nil then
+            enemy4_x1[1] = enemy4_x1[1] - 100 * dt
+          end
+          if enemy4_x1[2] ~= nil then
+            enemy4_x1[2] = enemy4_x1[2] - 100 * dt
+          end
+          if enemy4_x1[3] ~= nil then
+            enemy4_x1[3] = enemy4_x1[3] - 100 * dt
+          end
           if rx <= -610 then
             enemyFlag = false
             randEnemy = math.random(1, 3)
@@ -161,6 +217,10 @@ function enemy (enemy_type, x, y)
             enemies[1] = enemy(1, 600, 407)
             enemies[2] = enemy(2, 600, 427)
             enemies[3] = enemy(3, 600, 427)
+            enemy3_x1 = {}
+            enemy3_y1 = {}
+            enemy3_w = {}
+            enemy3_h = {} 
           end
           ry = ry + (100 * dt * dir)
           if ry <= 300 then
@@ -173,6 +233,10 @@ function enemy (enemy_type, x, y)
   }
 end
 
+function checar_colisao3 (x1, y1, w1, h1, x2, y2, w2, h2)
+  return x1 < x2+w2 and x2 < x1+w1 and y1 < y2+h2 and y2 < y1+h1
+end
+
 function love.load()
   gamestate = "menu"
   love.window.setTitle("NIAB")
@@ -181,9 +245,12 @@ function love.load()
   love.window.setMode(w, h)
   player_x = 100
   player_y = 100
+  player_w = 25
+  player_h = 25
   animation = 0
   oscilation = 60
   player = player(player_x, player_y, 25, 25)
+  player_y = 401
   platform = platform(600, 427, 1200, 40)
   enemies = {}
   enemies[1] = enemy(1, 600, 407)
@@ -200,16 +267,33 @@ function love.load()
   randFlag = false
   jump = -1
   fixFlag = true
+  enemy1_x1 = {}
+  enemy1_y1 = {}
+  enemy1_w = {}
+  enemy1_h = {}
+  enemy2_x1 = {}
+  enemy2_y1 = {}
+  enemy2_w = {}
+  enemy2_h = {} 
+  enemy3_x1 = {}
+  enemy3_y1 = {}
+  enemy3_w = {}
+  enemy3_h = {}
+  enemy4_x1 = {}
+  enemy4_y1 = {}
+  enemy4_w = {}
+  enemy4_h = {}
+
   
-  m = mqtt.client.create("test.mosquitto.org", 1883, mqttcb)
+  --[[m = mqtt.client.create("test.mosquitto.org", 1883, mqttcb)
   m:connect("BernardoSnow")
   m:subscribe({"jump"})
-  m:subscribe({"changeColour"})
+  m:subscribe({"changeColour"})]]--
 end
 
 function love.keypressed(key)
   if gamestate == "playing" then
-    i = 0
+    i = 0    
   elseif gamestate == "menu" then
     if key == 'return' then
       gamestate = "preplaying"
@@ -219,13 +303,15 @@ function love.keypressed(key)
       love.event.quit()
     end
   end
+  player.keypressed(key)
+
 end
 
 function love.update(dt)
-  m:handler()
+  --m:handler()
   math.randomseed(dt)
   if randFlag == false then
-    randEnemy = math.random(1, 3)
+    randEnemy = math.random(1, 1)
     randFlag = true
   end
   player.update(dt)
@@ -240,7 +326,37 @@ function love.update(dt)
       timeflow = -1
     end
     enemies[randEnemy].update(dt)
+    for i = 1, 10, 1 do
+      if enemy1_w[i] ~= nil then
+        print(checar_colisao2(player_x, player_y, player_w, enemy1_x1[i], enemy1_w[i]) ,(playerColour == randColour[i]))
+        if checar_colisao2(player_x, player_y, player_w, enemy1_x1[i], enemy1_w[i]) then
+          if (playerColour ~= randColour[i]) then
+            gamestate = 'gameover'
+          end
+        end
+      end
+    end
+    for i = 0, 3, 1 do
+      if enemy2_w[i] ~= nil then
+        if checar_colisao2(player_x, player_y, 0, enemy2_x1[i], enemy2_w[i]) then
+          gamestate = 'gameover'
+          end
+      end
+    end
+    for i = 0, 2, 1 do
+      if enemy3_w[i] ~= nil then
+        if checar_colisao3(player_x, player_y, player_w, player_h, enemy3_x1[i], enemy3_y1[i], enemy3_w[i], enemy3_h[i]) and (playerColour == randColour[i]) then
+          gamestate = 'gameover'
+          end
+      end
+      if enemy4_w[i] ~= nil then
+        if checar_colisao2(player_x, player_y, player_w, enemy4_x1[i], enemy4_w[i]) then
+          gamestate = 'gameover'
+          end
+      end
+    end
   end
+
 end
 
 function love.draw()
@@ -250,7 +366,7 @@ function love.draw()
     player.draw()
     platform.draw()
     if enemyFlag == false then
-      randColour = {math.random(0, 1), math.random(0, 1), math.random(0, 1), math.random(0, 1), math.random(0, 1), math.random(0, 1), math.random(0, 1), math.random(0, 1), math.random(0, 1),          math.random(0, 1)}
+      randColour = {math.random(0, 1), math.random(0, 1), math.random(0, 1), math.random(0, 1), math.random(0, 1), math.random(0, 1), math.random(0, 1), math.random(0, 1), math.random(0, 1), math.random(0, 1)}
       enemyFlag = true
     end
     
@@ -263,5 +379,13 @@ function love.draw()
     love.graphics.print("Bem vindo a", w/10, h/8)
     love.graphics.setFont(love.graphics.newFont("the dark.ttf", 70))
     love.graphics.print("NIAB", w - 160, h/8)
+  elseif gamestate == "gameover" then
+    love.graphics.setColor(192, 210, 255)
+    love.graphics.rectangle("fill", 0, 0, w, h)
+    love.graphics.setColor(204, 0, 0)
+    love.graphics.setFont(love.graphics.newFont("CookieMonster.ttf", 70))
+    love.graphics.print("GAME", w/10, h/8)
+    love.graphics.setFont(love.graphics.newFont("the dark.ttf", 70))
+    love.graphics.print("OVER", w - 350, h/8)
   end
 end
