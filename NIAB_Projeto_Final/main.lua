@@ -13,7 +13,12 @@ function checar_colisao2 (x1, y1, w1, x2, w2)
   return x1 < x2+w2 and x2 < x1+w1 and y1>=400
 end
 
-function checar_colisao3 (x1, y1, w1, h1, x2, y2, w2, h2)
+function checar_colisao3 (x1, y1, w1, x2, w2)
+  return x1 < x2+w2 and x2 < x1+w1 and y1<=390
+end
+
+
+function checar_colisao4 (x1, y1, w1, h1, x2, y2, w2, h2)
   return x1 < x2+w2 and x2 < x1+w1 and y1 < y2+h2 and y2 < y1+h1
 end
 
@@ -51,10 +56,10 @@ function player (x,y,w,h)
           end
         end
         if mudaCor == true then
-          if playerColour == "red" then
-            playerColour = "green"
+          if playerColour == 1 then
+            playerColour = 0
           else
-            playerColour = "red"
+            playerColour = 1
           end
           mudaCor = false
         end
@@ -163,7 +168,7 @@ function enemy (enemy_type, x, y)
               enemy1_x1[i] = enemy1_x1[i] - 100 * dt
             end
           end
-          if rx <= -1310 then
+          if rx <= -1350 then
             enemyFlag = false
             randEnemy = math.random(1, 3)
             width = 0
@@ -185,7 +190,7 @@ function enemy (enemy_type, x, y)
               enemy2_x1[i] = enemy2_x1[i] - 100 * dt
             end
           end
-          if rx <= -490 then
+          if rx <= -550 then
             enemyFlag = false
             randEnemy = math.random(1, 3)
             width = 0
@@ -220,7 +225,7 @@ function enemy (enemy_type, x, y)
           if enemy4_x1[3] ~= nil then
             enemy4_x1[3] = enemy4_x1[3] - 100 * dt
           end
-          if rx <= -610 then
+          if rx <= -680 then
             enemyFlag = false
             randEnemy = math.random(1, 3)
             width = 0
@@ -251,6 +256,7 @@ function enemy (enemy_type, x, y)
 end
 
 function love.load()
+  
   gamestate = "menu"
   love.window.setTitle("NIAB")
   w = 600
@@ -312,6 +318,7 @@ function love.keypressed(key)
     i = 0    
   elseif gamestate == "menu" then
     if key == 'return' then
+      m:publish("PedidoLove", "inicio")
       gamestate = "preplaying"
     end
   else
@@ -327,7 +334,7 @@ function love.update(dt)
   m:handler()
   math.randomseed(dt*velocidade)
   if randFlag == false then
-    randEnemy = math.random(1, 3)
+    randEnemy = math.random(3, 3)
     randFlag = true
   end
   player.update(dt*velocidade)
@@ -360,7 +367,7 @@ function love.update(dt)
     end
     for i = 1, 3, 1 do
       if enemy3_w[i] ~= nil then
-        if checar_colisao3(player_x, player_y, player_w, player_h, enemy3_x1[i], enemy3_y1[i], enemy3_w[i], enemy3_h[i]) then
+        if checar_colisao3(player_x, player_y, player_w, enemy3_x1[i], enemy3_w[i]) then
           if (playerColour ~= randColour[i]) then
           gamestate = 'gameover'
           end

@@ -20,7 +20,20 @@ end
 function conectado (c)
     c:publish("Sucesso", "NodeMCU Conectou.", 0,  0, 
                   function(client, reason) print("Conexão estabelecida") end)
+   c:subscribe("PedidoLove", 0, Love_callback)
 end
+
+
+function Love_callback(c)
+    local function mensagemLove(userdata, topic, message)
+            if(message == "inicio") then
+                ledstate = 1
+                led(ledstate)
+            end
+    end
+    c:on("message",mensagemLove)
+end
+
 
 function Button_pressed1()
     local delay = 500000
