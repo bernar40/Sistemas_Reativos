@@ -346,7 +346,7 @@ function love.update(dt)
       if enemy1_w[i] ~= nil then
         if checar_colisao2(player_x, player_y, player_w, enemy1_x1[i], enemy1_w[i]) then
           if (playerColour ~= randColour[i]) then
-            --gamestate = 'gameover'
+            gamestate = 'gameover'
           end
         end
       end
@@ -354,7 +354,7 @@ function love.update(dt)
     for i = 1, 4, 1 do
       if enemy2_w[i] ~= nil then
         if checar_colisao2(player_x, player_y, 0, enemy2_x1[i], enemy2_w[i]) then
-          --gamestate = 'gameover'
+          gamestate = 'gameover'
           end
       end
     end
@@ -362,13 +362,13 @@ function love.update(dt)
       if enemy3_w[i] ~= nil then
         if checar_colisao3(player_x, player_y, player_w, player_h, enemy3_x1[i], enemy3_y1[i], enemy3_w[i], enemy3_h[i]) then
           if (playerColour ~= randColour[i]) then
-          --gamestate = 'gameover'
+          gamestate = 'gameover'
           end
         end
       end
       if enemy4_w[i] ~= nil then
         if checar_colisao2(player_x, player_y, player_w, enemy4_x1[i], enemy4_w[i]) then
-          --gamestate = 'gameover'
+          gamestate = 'gameover'
           end
       end
     end

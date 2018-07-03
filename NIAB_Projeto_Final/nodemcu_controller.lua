@@ -2,7 +2,7 @@ sw1 = 1
 sw2 = 2
 led_r = 3
 led_g = 6
-ledstate = 0
+ledstate = -1
 gpio.mode(led_g, gpio.OUTPUT)
 gpio.mode(led_r, gpio.OUTPUT)
 gpio.mode(sw1,gpio.INT,gpio.PULLUP)
@@ -14,8 +14,6 @@ local m = mqtt.Client("1511651", 120)
 function publica(c, Msg, subject)
   pub = c:publish(subject, Msg ,0,0, 
             function(client, reason) print( Msg .. " enviada!") end)
-    gpio.write(led_r, gpio.LOW)
-    gpio.write(led_g, gpio.LOW)
 
 end
 
@@ -32,7 +30,6 @@ function Button_pressed1()
         local now = tmr.now()
         if now - last < delay then return end
             last = now
-            gpio.write(led_g, gpio.HIGH)
             publica(m, "pula", "jump")
     end
 end
@@ -48,7 +45,7 @@ function Button_pressed2()
         if now - last < delay then return end
             last = now
             publica(m, "mudaCor", "changeColour")
-            ledstate = !ledstate
+            ledstate =  -1*ledstate
             led(ledstate)
     end
 end
@@ -59,10 +56,10 @@ m:connect("test.mosquitto.org", 1883, 0,
              function(client, reason) print("failed reason: "..reason) end)
  
 function led(ledstate)
-  if ledstate == 0 then
+  if ledstate == 1 then
     gpio.write(led_r, gpio.LOW)
     gpio.write(led_g, gpio.HIGH)
-  elseif ledstate == 1 then
+  elseif ledstate == -1 then
     gpio.write(led_r, gpio.HIGH)
     gpio.write(led_g, gpio.LOW)
   end
