@@ -328,7 +328,6 @@ function love.update(dt)
     enemies[randEnemy].update(dt)
     for i = 1, 10, 1 do
       if enemy1_w[i] ~= nil then
-        print(checar_colisao2(player_x, player_y, player_w, enemy1_x1[i], enemy1_w[i]) ,(playerColour == randColour[i]))
         if checar_colisao2(player_x, player_y, player_w, enemy1_x1[i], enemy1_w[i]) then
           if (playerColour ~= randColour[i]) then
             gamestate = 'gameover'
