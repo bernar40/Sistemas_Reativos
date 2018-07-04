@@ -125,8 +125,7 @@ function enemy (enemy_type, x, y)
               table.insert(enemy1_w, 80)
               table.insert(enemy1_h, 200)
           end
-        end
-        if enemy_type == 2 then
+        elseif enemy_type == 2 then
           for i = 1,4,1 do
             love.graphics.setColor(r, g, b)
             love.graphics.rectangle("fill", rx + (i * 120), ry, 60, 40)
@@ -135,8 +134,7 @@ function enemy (enemy_type, x, y)
             table.insert(enemy2_w, 60)
             table.insert(enemy2_h, 40)
           end
-        end
-        if enemy_type == 3 then
+        elseif enemy_type == 3 then
           for i = 1,3,1 do
             love.graphics.setColor(100, 100, 100)
             love.graphics.polygon("fill", rx + (i * 200), ry2, (rx+15)+(i*200), ry2-30, (rx+30)+(i*200), ry2)
